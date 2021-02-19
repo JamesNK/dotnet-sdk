@@ -11,6 +11,7 @@ using Dapr.Client;
 using Dapr.Client.Autogen.Grpc.v1;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using GrpcServiceSample.FirstClassGrpc;
 using GrpcServiceSample.Generated;
 using Microsoft.Extensions.Logging;
 
@@ -19,14 +20,14 @@ namespace GrpcServiceSample
     /// <summary>
     /// BankAccount gRPC service
     /// </summary>
-    public class BankingService : AppCallback.AppCallbackBase
+    internal class CallbackService : CoolAppCallbackBase
     {
         /// <summary>
         /// State store name.
         /// </summary>
         public const string StoreName = "statestore";
 
-        private readonly ILogger<BankingService> _logger;
+        private readonly ILogger<CallbackService> _logger;
         private readonly DaprClient _daprClient;
 
         /// <summary>
@@ -34,7 +35,7 @@ namespace GrpcServiceSample
         /// </summary>
         /// <param name="daprClient"></param>
         /// <param name="logger"></param>
-        public BankingService(DaprClient daprClient, ILogger<BankingService> logger)
+        public CallbackService(DaprClient daprClient, ILogger<CallbackService> logger)
         {
             _daprClient = daprClient;
             _logger = logger;
@@ -48,29 +49,29 @@ namespace GrpcServiceSample
         /// <param name="request"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public override async Task<InvokeResponse> OnInvoke(InvokeRequest request, ServerCallContext context)
-        {
-            var response = new InvokeResponse();
-            switch (request.Method)
-            {
-                case "getaccount":                
-                    var input = request.Data.Unpack<GrpcServiceSample.Generated.GetAccountRequest>();
-                    var output = await GetAccount(input, context);
-                    response.Data = Any.Pack(output);
-                    break;
-                case "deposit":
-                case "withdraw":
-                    var transaction = request.Data.Unpack<GrpcServiceSample.Generated.Transaction>();
-                    var account = request.Method == "deposit" ?
-                        await Deposit(transaction, context) :
-                        await Withdraw(transaction, context);
-                    response.Data = Any.Pack(account);
-                    break;
-                default:
-                    break;
-            }
-            return response;
-        }
+        //public override async Task<InvokeResponse> OnInvoke(InvokeRequest request, ServerCallContext context)
+        //{
+        //    var response = new InvokeResponse();
+        //    switch (request.Method)
+        //    {
+        //        case "getaccount":
+        //            var input = request.Data.Unpack<GrpcServiceSample.Generated.GetAccountRequest>();
+        //            var output = await GetAccount(input, context);
+        //            response.Data = Any.Pack(output);
+        //            break;
+        //        case "deposit":
+        //        case "withdraw":
+        //            var transaction = request.Data.Unpack<GrpcServiceSample.Generated.Transaction>();
+        //            var account = request.Method == "deposit" ?
+        //                await Deposit(transaction, context) :
+        //                await Withdraw(transaction, context);
+        //            response.Data = Any.Pack(account);
+        //            break;
+        //        default:
+        //            break;
+        //    }
+        //    return response;
+        //}
 
         /// <summary>
         /// implement ListTopicSubscriptions to register deposit and withdraw subscriber

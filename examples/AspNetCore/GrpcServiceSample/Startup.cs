@@ -3,10 +3,13 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
+using Grpc.AspNetCore.Server.Model;
+using GrpcServiceSample.FirstClassGrpc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 
 namespace GrpcServiceSample
@@ -25,6 +28,10 @@ namespace GrpcServiceSample
             services.AddGrpc();
 
             services.AddDaprClient();
+
+            services.TryAddSingleton<MethodRegistration>();
+            services.TryAddSingleton(typeof(ServerCallHandlerFactory<>));
+            services.TryAddEnumerable(ServiceDescriptor.Singleton(typeof(IServiceMethodProvider<>), typeof(DaprServiceMethodProvider<>)));
         }
 
         /// <summary>
@@ -43,7 +50,8 @@ namespace GrpcServiceSample
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<BankingService>();
+                endpoints.MapGrpcService<CallbackService>();
+                endpoints.MapGrpcService<DataService>();
 
                 endpoints.MapGet("/", async context =>
                 {

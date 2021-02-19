@@ -22,3 +22,9 @@ message Transaction {
     // Ideally we'd use the Money data type here, but to keep the sample simple we're using an int.
     int32 Amount = 2;
 }
+
+service Data {
+    rpc GetAccount (GetAccountRequest) returns (Account);
+    rpc Deposit (Transaction) returns (Account);
+    rpc Withdraw (Transaction) returns (Account);
+}
